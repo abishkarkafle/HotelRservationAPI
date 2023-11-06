@@ -15,12 +15,13 @@ namespace HotelRservationAPI.Migrations
                 name: "registers",
                 columns: table => new
                 {
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_registers", x => x.Username);
                 });
 
             migrationBuilder.CreateTable(

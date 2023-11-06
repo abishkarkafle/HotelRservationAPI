@@ -19,7 +19,7 @@ namespace HotelRservationAPI.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Register>()
-                .HasNoKey();
+                .HasKey(r => r.Username);
         }
     }
 }

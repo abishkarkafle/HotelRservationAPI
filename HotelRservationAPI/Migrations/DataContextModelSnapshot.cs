@@ -24,6 +24,9 @@ namespace HotelRservationAPI.Migrations
 
             modelBuilder.Entity("HotelRservationAPI.Models.Register", b =>
                 {
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -32,9 +35,7 @@ namespace HotelRservationAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Username");
 
                     b.ToTable("registers");
                 });
