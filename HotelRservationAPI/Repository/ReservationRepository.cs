@@ -1,9 +1,10 @@
 ﻿using HotelRservationAPI.Data;
+using HotelRservationAPI.Interface;
 using HotelRservationAPI.Models;
 
 namespace HotelRservationAPI.Repository
 {
-    public class ReservationRepository
+    public class ReservationRepository : IReservationRepository
     {
         private readonly DataContext _context;
 
@@ -12,7 +13,7 @@ namespace HotelRservationAPI.Repository
             _context = context;
         }
 
-        public ICollection<Reservation> GetBillings()
+        public ICollection<Reservation> GetReservations()
         {
             return _context.reservations.OrderBy(s => s.ReservationID).ToList();
         }
