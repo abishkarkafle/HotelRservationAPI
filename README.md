@@ -1,5 +1,5 @@
 # Your API Name (Under Development)
 
-[Short description of your API and its purpose.]
+[API for Hotels to manage reservations and many more.]
 
 **Note: This API is currently under development and may not be suitable for production use.**
