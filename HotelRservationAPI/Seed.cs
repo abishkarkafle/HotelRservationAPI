@@ -17,34 +17,36 @@ namespace HotelRservationAPI
             if (!Context.rooms.Any())
             {
                 var RoomSeed = new List<Room>
-                {
-                    new Room
-                    {
-                            RoomType = "Single",
-                            PricePerNight = 150,
-                            AvailableCount = 5
-                    },
-                    new Room
-                    {
-                        RoomType = "Double",
-                        PricePerNight = 300,
-                        AvailableCount = 8
-
-                    }
-                };
+        {
+            new Room
+            {
+                RoomType = "Single",
+                PricePerNight = 150,
+                AvailableCount = 5
+            },
+            new Room
+            {
+                RoomType = "Double",
+                PricePerNight = 300,
+                AvailableCount = 8
+            }
+        };
                 Context.rooms.AddRange(RoomSeed);
 
                 var ReservationSeed = new List<Reservation>
-                {
-                    new Reservation
-                    {
-                        RoomType = "Single",
-                        CheckinDate = DateTime.Now,
-                        CheckoutDate = DateTime.Now,
-                    }
-                };
+        {
+            new Reservation
+            {
+                RoomType = "Single",
+                CheckinDate = DateTime.Now,
+                CheckoutDate = DateTime.Now,
+            }
+        };
                 Context.reservations.AddRange(ReservationSeed);
+
+                Context.SaveChanges(); // Save changes to the database
             }
         }
+
     }
 }
