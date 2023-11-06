@@ -33,6 +33,17 @@ namespace HotelRservationAPI
                     }
                 };
                 Context.rooms.AddRange(RoomSeed);
+
+                var ReservationSeed = new List<Reservation>
+                {
+                    new Reservation
+                    {
+                        RoomType = "Single",
+                        CheckinDate = DateTime.Now,
+                        CheckoutDate = DateTime.Now,
+                    }
+                };
+                Context.reservations.AddRange(ReservationSeed);
             }
         }
     }
