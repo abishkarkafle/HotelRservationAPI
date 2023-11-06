@@ -1,4 +1,5 @@
 ﻿using HotelRservationAPI.Data;
+using HotelRservationAPI.Models;
 
 namespace HotelRservationAPI
 {
@@ -13,7 +14,26 @@ namespace HotelRservationAPI
 
         public void SeedDataContext()
         {
+            if (!Context.rooms.Any())
+            {
+                var RoomSeed = new List<Room>
+                {
+                    new Room
+                    {
+                            RoomType = "Single",
+                            PricePerNight = 150,
+                            AvailableCount = 5
+                    },
+                    new Room
+                    {
+                        RoomType = "Double",
+                        PricePerNight = 300,
+                        AvailableCount = 8
 
+                    }
+                };
+                Context.rooms.AddRange(RoomSeed);
+            }
         }
     }
 }
