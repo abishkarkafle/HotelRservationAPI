@@ -8,7 +8,7 @@ namespace HotelRservationAPI.Interface
         Room GetRoom (int id);
         Room GetRoom (string  Roomtype);
 
-        bool RoomExist (int ID);
+        bool RoomExist (int RoomID);
         bool CreateRoom(Room room);
         bool UpdateRoom(Room room);
         bool DeleteRoom(Room room);

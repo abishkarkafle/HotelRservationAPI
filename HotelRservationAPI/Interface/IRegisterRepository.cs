@@ -7,7 +7,7 @@ namespace HotelRservationAPI.Interface
         ICollection<Register> GetRegisters();
         Register GetRegister (string username);
 
-        bool RegisterExist (string username);
+        bool RegisterExist (string Username);
         bool CreateRegister(Register register);
         bool UpdateRegister(Register register);
         bool DeleteRegister(Register register);
