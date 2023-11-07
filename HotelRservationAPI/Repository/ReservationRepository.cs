@@ -19,7 +19,7 @@ namespace HotelRservationAPI.Repository
             return save();
         }
 
-        public bool DeleteCategory(Reservation reservation)
+        public bool DeleteReservation(Reservation reservation)
         {
             _context.Remove(reservation);
             return save();

@@ -8,13 +8,13 @@ namespace HotelRservationAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReservationController : Controller
+    public class RegisterController : Controller
     {
-        private readonly IReservationRepository _reservationRepository;
+        private readonly IRegisterRepository _registerRepository;
 
-        public ReservationController(IReservationRepository reservationRepository)
+        public RegisterController(IRegisterRepository registerRepository)
         {
-            _reservationRepository = reservationRepository;
+            _registerRepository = registerRepository;
         }
 
 
@@ -26,24 +26,24 @@ namespace HotelRservationAPI.Controllers
 
         public IActionResult GetBilling()
         {
-            var billing = _reservationRepository.GetReservations();
+            var billing = _registerRepository.GetRegisters();
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             return Ok(billing);
         }
 
-        [HttpGet("{LogInID}")]
+        [HttpGet("{UserName}")]
         [ProducesResponseType(200, Type = typeof(Reservation))]
         [ProducesResponseType(400)]
 
-        public IActionResult GetAccesslog(int LogInID)
+        public IActionResult GetAccesslog(string username)
         {
-            if (!_reservationRepository.ReservationExist(LogInID))
+            if (!_registerRepository.RegisterExist(username))
             {
                 return NotFound();
             }
 
-            var AccessLog = _reservationRepository.GetReservation(LogInID);
+            var AccessLog = _registerRepository.GetRegister(username);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -56,13 +56,13 @@ namespace HotelRservationAPI.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateReservation([FromBody] ReservationDto  reservationCreate)
+        public IActionResult CreateRegister([FromBody] RegisterDto  registerCreate)
         {
-            if (reservationCreate == null)
+            if (registerCreate == null)
                 return BadRequest(ModelState);
 
-            var category = _reservationRepository.GetReservations()
-                .Where(c => c.RoomType.Trim().ToUpper() == reservationCreate.RoomType.TrimEnd().ToUpper())
+            var category = _registerRepository.GetRegisters()
+                .Where(c => c.Username.Trim().ToUpper() == registerCreate.Username.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
             if (category != null)
@@ -74,12 +74,14 @@ namespace HotelRservationAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var categoryMap = new Reservation
+            var categoryMap = new Register
             {
-                RoomType = reservationCreate.RoomType
+                Username = registerCreate.Username,
+                Password = registerCreate.Password,
+                Email = registerCreate.Email
             };
 
-            if (!_reservationRepository.CreateReservation(categoryMap))
+            if (!_registerRepository.CreateRegister(categoryMap))
             {
                 ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
@@ -90,37 +92,34 @@ namespace HotelRservationAPI.Controllers
         }
         #endregion
 
-
         #region Update
 
-        [HttpPut("{ReservationID}")]
+        [HttpPut("{Username}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
 
-        public IActionResult UpdateCategory(int ReservationID, [FromBody] ReservationDto updatedReservation)
+        public IActionResult UpdateCategory(string username, [FromBody] RegisterDto updatedRegister)
         {
-            if (updatedReservation == null)
+            if (updatedRegister == null)
                 return BadRequest(ModelState);
 
-            if (ReservationID != updatedReservation.ReservationID)
+            if (username != updatedRegister.Username)
                 return BadRequest(ModelState);
 
-            if (!_reservationRepository.ReservationExist(ReservationID))
+            if (!_registerRepository.RegisterExist(username))
                 return NotFound();
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var categoryMap = new Reservation
+            var categoryMap = new Register
             {
-                ReservationID = updatedReservation.ReservationID,
-                RoomType = updatedReservation.RoomType,
-                CheckinDate = updatedReservation.CheckinDate,
-                CheckoutDate = updatedReservation.CheckoutDate
+                Username = updatedRegister.Username,
+                Email = updatedRegister.Email,
             };
 
-            if (!_reservationRepository.UpdateReservation(categoryMap))
+            if (!_registerRepository.UpdateRegister(categoryMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating category");
                 return StatusCode(500, ModelState);
@@ -133,23 +132,23 @@ namespace HotelRservationAPI.Controllers
 
         #region Delete
 
-        [HttpDelete("{ReservationID}")]
+        [HttpDelete("{Username}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteCategory(int reservationID)
+        public IActionResult DeleteCategory(string username)
         {
-            if (!_reservationRepository.ReservationExist(reservationID))
+            if (!_registerRepository.RegisterExist(username))
             {
                 return NotFound();
             }
 
-            var ReservationToDelete = _reservationRepository.GetReservation(reservationID);
+            var RegisterToDelete = _registerRepository.GetRegister(username);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_reservationRepository.DeleteReservation(ReservationToDelete))
+            if (!_registerRepository.DeleteRegister(RegisterToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong deleting category");
             }

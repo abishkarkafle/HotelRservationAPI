@@ -8,15 +8,14 @@ namespace HotelRservationAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReservationController : Controller
+    public class RoomController : Controller
     {
-        private readonly IReservationRepository _reservationRepository;
+        private readonly IRoomRepository _roomRepository;
 
-        public ReservationController(IReservationRepository reservationRepository)
+        public RoomController(IRoomRepository roomRepository)
         {
-            _reservationRepository = reservationRepository;
+            _roomRepository = roomRepository;
         }
-
 
         #region HTTPGet
 
@@ -26,7 +25,7 @@ namespace HotelRservationAPI.Controllers
 
         public IActionResult GetBilling()
         {
-            var billing = _reservationRepository.GetReservations();
+            var billing = _roomRepository.GetRooms();
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             return Ok(billing);
@@ -38,12 +37,12 @@ namespace HotelRservationAPI.Controllers
 
         public IActionResult GetAccesslog(int LogInID)
         {
-            if (!_reservationRepository.ReservationExist(LogInID))
+            if (!_roomRepository.RoomExist(LogInID))
             {
                 return NotFound();
             }
 
-            var AccessLog = _reservationRepository.GetReservation(LogInID);
+            var AccessLog = _roomRepository.GetRoom(LogInID);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -56,13 +55,13 @@ namespace HotelRservationAPI.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateReservation([FromBody] ReservationDto  reservationCreate)
+        public IActionResult CreateRoom([FromBody] RoomDto  roomCreate)
         {
-            if (reservationCreate == null)
+            if (roomCreate == null)
                 return BadRequest(ModelState);
 
-            var category = _reservationRepository.GetReservations()
-                .Where(c => c.RoomType.Trim().ToUpper() == reservationCreate.RoomType.TrimEnd().ToUpper())
+            var category = _roomRepository.GetRooms()
+                .Where(c => c.RoomType.Trim().ToUpper() == roomCreate.RoomType.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
             if (category != null)
@@ -74,12 +73,12 @@ namespace HotelRservationAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var categoryMap = new Reservation
+            var categoryMap = new Room
             {
-                RoomType = reservationCreate.RoomType
+                RoomType = roomCreate.RoomType
             };
 
-            if (!_reservationRepository.CreateReservation(categoryMap))
+            if (!_roomRepository.CreateRoom(categoryMap))
             {
                 ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
@@ -90,37 +89,36 @@ namespace HotelRservationAPI.Controllers
         }
         #endregion
 
-
         #region Update
 
-        [HttpPut("{ReservationID}")]
+        [HttpPut("{RoomID}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
 
-        public IActionResult UpdateCategory(int ReservationID, [FromBody] ReservationDto updatedReservation)
+        public IActionResult UpdateCategory(int RoomID, [FromBody] RoomDto updatedRoom)
         {
-            if (updatedReservation == null)
+            if (updatedRoom == null)
                 return BadRequest(ModelState);
 
-            if (ReservationID != updatedReservation.ReservationID)
+            if (RoomID != updatedRoom.RoomID)
                 return BadRequest(ModelState);
 
-            if (!_reservationRepository.ReservationExist(ReservationID))
+            if (!_roomRepository.RoomExist(RoomID))
                 return NotFound();
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var categoryMap = new Reservation
+            var categoryMap = new Room
             {
-                ReservationID = updatedReservation.ReservationID,
-                RoomType = updatedReservation.RoomType,
-                CheckinDate = updatedReservation.CheckinDate,
-                CheckoutDate = updatedReservation.CheckoutDate
+                RoomID = updatedRoom.RoomID,
+                RoomType = updatedRoom.RoomType,
+                AvailableCount = updatedRoom.AvailableCount,
+                PricePerNight = updatedRoom.PricePerNight
             };
 
-            if (!_reservationRepository.UpdateReservation(categoryMap))
+            if (!_roomRepository.UpdateRoom(categoryMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating category");
                 return StatusCode(500, ModelState);
@@ -133,23 +131,23 @@ namespace HotelRservationAPI.Controllers
 
         #region Delete
 
-        [HttpDelete("{ReservationID}")]
+        [HttpDelete("{RoomID}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteCategory(int reservationID)
+        public IActionResult DeleteRoom(int roomID)
         {
-            if (!_reservationRepository.ReservationExist(reservationID))
+            if (!_roomRepository.RoomExist(roomID))
             {
                 return NotFound();
             }
 
-            var ReservationToDelete = _reservationRepository.GetReservation(reservationID);
+            var ReservationToDelete = _roomRepository.GetRoom(roomID);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_reservationRepository.DeleteReservation(ReservationToDelete))
+            if (!_roomRepository.DeleteRoom(ReservationToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong deleting category");
             }

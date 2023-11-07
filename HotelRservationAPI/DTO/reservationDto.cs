@@ -1,6 +1,6 @@
 ﻿namespace HotelRservationAPI.DTO
 {
-    public class reservationDto
+    public class ReservationDto
     {
         public int ReservationID { get; set; }
         public String RoomType { get; set; }

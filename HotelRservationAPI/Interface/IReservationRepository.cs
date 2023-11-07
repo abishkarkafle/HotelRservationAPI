@@ -11,7 +11,7 @@ namespace HotelRservationAPI.Interface
         bool ReservationExist (int ID);
         bool CreateReservation(Reservation reservation);
         bool UpdateReservation(Reservation reservation);
-        bool DeleteCategory(Reservation reservation);
+        bool DeleteReservation(Reservation reservation);
 
         bool save();
 
