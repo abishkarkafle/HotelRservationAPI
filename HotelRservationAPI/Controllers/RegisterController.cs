@@ -22,7 +22,7 @@ namespace HotelRservationAPI.Controllers
 
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Reservation>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Register>))]
 
         public IActionResult GetBilling()
         {
@@ -33,7 +33,7 @@ namespace HotelRservationAPI.Controllers
         }
 
         [HttpGet("{UserName}")]
-        [ProducesResponseType(200, Type = typeof(Reservation))]
+        [ProducesResponseType(200, Type = typeof(Register))]
         [ProducesResponseType(400)]
 
         public IActionResult GetAccesslog(string username)
@@ -116,6 +116,7 @@ namespace HotelRservationAPI.Controllers
             var categoryMap = new Register
             {
                 Username = updatedRegister.Username,
+                Password = updatedRegister.Password,
                 Email = updatedRegister.Email,
             };
 

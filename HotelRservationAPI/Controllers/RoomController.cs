@@ -21,7 +21,7 @@ namespace HotelRservationAPI.Controllers
 
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Reservation>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Room>))]
 
         public IActionResult GetBilling()
         {
@@ -32,7 +32,7 @@ namespace HotelRservationAPI.Controllers
         }
 
         [HttpGet("{LogInID}")]
-        [ProducesResponseType(200, Type = typeof(Reservation))]
+        [ProducesResponseType(200, Type = typeof(Room))]
         [ProducesResponseType(400)]
 
         public IActionResult GetAccesslog(int LogInID)
