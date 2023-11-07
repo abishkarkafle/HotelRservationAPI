@@ -35,9 +35,9 @@ namespace HotelRservationAPI.Repository
             return _context.registers.OrderBy(s => s.Username).ToList();
         }
 
-        public bool RegisterExist(string username)
+        public bool RegisterExist(string Username)
         {
-            return _context.registers.Any(a => a.Username == username);
+            return _context.registers.Any(a => a.Username == Username);
         }
 
         public bool save()

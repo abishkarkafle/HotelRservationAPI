@@ -135,14 +135,14 @@ namespace HotelRservationAPI.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteRoom(int roomID)
+        public IActionResult DeleteRoom(int RoomID)
         {
-            if (!_roomRepository.RoomExist(roomID))
+            if (!_roomRepository.RoomExist(RoomID))
             {
                 return NotFound();
             }
 
-            var ReservationToDelete = _roomRepository.GetRoom(roomID);
+            var ReservationToDelete = _roomRepository.GetRoom(RoomID);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

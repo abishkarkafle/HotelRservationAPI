@@ -137,14 +137,14 @@ namespace HotelRservationAPI.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteCategory(int reservationID)
+        public IActionResult DeleteCategory(int ReservationID)
         {
-            if (!_reservationRepository.ReservationExist(reservationID))
+            if (!_reservationRepository.ReservationExist(ReservationID))
             {
                 return NotFound();
             }
 
-            var ReservationToDelete = _reservationRepository.GetReservation(reservationID);
+            var ReservationToDelete = _reservationRepository.GetReservation(ReservationID);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
