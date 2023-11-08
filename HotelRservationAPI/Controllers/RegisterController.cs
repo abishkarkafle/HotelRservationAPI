@@ -1,8 +1,14 @@
-﻿using HotelRservationAPI.DTO;
+﻿using Azure.Core;
+using HotelRservationAPI.DTO;
 using HotelRservationAPI.Interface;
 using HotelRservationAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace HotelRservationAPI.Controllers
 {
@@ -10,153 +16,84 @@ namespace HotelRservationAPI.Controllers
     [ApiController]
     public class RegisterController : Controller
     {
-        private readonly IRegisterRepository _registerRepository;
+        public static Register user = new Register();
+        private readonly IConfiguration _configuration;
 
-        public RegisterController(IRegisterRepository registerRepository)
+        public RegisterController(IConfiguration configuration)
         {
-            _registerRepository = registerRepository;
+            _configuration = configuration;
         }
 
 
-        #region HTTPGet
-
-
-        [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Register>))]
-
-        public IActionResult GetBilling()
+        [HttpPost("register")]
+        public async Task<ActionResult<Register>> Register(RegisterDto request)
         {
-            var billing = _registerRepository.GetRegisters();
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            return Ok(billing);
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            user.Username = request.Username;
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            return Ok(user);
         }
 
-        [HttpGet("{UserName}")]
-        [ProducesResponseType(200, Type = typeof(Register))]
-        [ProducesResponseType(400)]
-
-        public IActionResult GetAccesslog(string username)
+        [HttpPost("login")]
+        public async Task<ActionResult<string>> Login(RegisterDto request)
         {
-            if (!_registerRepository.RegisterExist(username))
+            if (user.Username != request.Username)
             {
-                return NotFound();
+                return BadRequest("User not found.");
             }
 
-            var AccessLog = _registerRepository.GetRegister(username);
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            return Ok(AccessLog);
-        }
-
-        #endregion
-
-        #region Post
-        [HttpPost]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        public IActionResult CreateRegister([FromBody] RegisterDto  registerCreate)
-        {
-            if (registerCreate == null)
-                return BadRequest(ModelState);
-
-            var category = _registerRepository.GetRegisters()
-                .Where(c => c.Username.Trim().ToUpper() == registerCreate.Username.TrimEnd().ToUpper())
-                .FirstOrDefault();
-
-            if (category != null)
+            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
-                ModelState.AddModelError("", "Category already exists");
-                return StatusCode(422, ModelState);
+                return BadRequest("Wrong password.");
             }
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                string token = CreateToken(user);
 
-            var categoryMap = new Register
+            return Ok(token);
+        }
+
+        private string CreateToken(Register user)
+        {
+            List<Claim> claims = new List<Claim>
             {
-                Username = registerCreate.Username,
-                Password = registerCreate.Password,
-                Email = registerCreate.Email
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, "Admin")
             };
 
-            if (!_registerRepository.CreateRegister(categoryMap))
-            {
-                ModelState.AddModelError("", "Something went wrong while saving");
-                return StatusCode(500, ModelState);
-            }
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+                _configuration.GetSection("AppSettings:Token").Value));
 
-            return Ok("Successfully created");
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds);
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
-        #endregion
 
-        #region Update
-
-        [HttpPut("{Username}")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-
-        public IActionResult UpdateCategory(string username, [FromBody] RegisterDto updatedRegister)
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            if (updatedRegister == null)
-                return BadRequest(ModelState);
-
-            if (username != updatedRegister.Username)
-                return BadRequest(ModelState);
-
-            if (!_registerRepository.RegisterExist(username))
-                return NotFound();
-
-            if (!ModelState.IsValid)
-                return BadRequest();
-
-            var categoryMap = new Register
+            using (var hmac = new HMACSHA512())
             {
-                Username = updatedRegister.Username,
-                Password = updatedRegister.Password,
-                Email = updatedRegister.Email,
-            };
-
-            if (!_registerRepository.UpdateRegister(categoryMap))
-            {
-                ModelState.AddModelError("", "Something went wrong updating category");
-                return StatusCode(500, ModelState);
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
-
-            return NoContent();
         }
 
-        #endregion
-
-        #region Delete
-
-        [HttpDelete("{Username}")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        public IActionResult DeleteCategory(string Username)
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            if (!_registerRepository.RegisterExist(Username))
+            using (var hmac = new HMACSHA512(passwordSalt))
             {
-                return NotFound();
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
             }
-
-            var RegisterToDelete = _registerRepository.GetRegister(Username);
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (!_registerRepository.DeleteRegister(RegisterToDelete))
-            {
-                ModelState.AddModelError("", "Something went wrong deleting category");
-            }
-
-            return NoContent();
         }
-
-        #endregion
     }
 }
