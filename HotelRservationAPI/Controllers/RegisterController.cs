@@ -26,7 +26,7 @@ namespace HotelRservationAPI.Controllers
 
 
         [HttpPost("register")]
-        public async Task<ActionResult<Register>> Register(RegisterDto request)
+        public async Task<ActionResult<Register>> RegisterUser(RegisterDto request)
         {
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -60,7 +60,6 @@ namespace HotelRservationAPI.Controllers
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, "Admin")
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -70,7 +69,7 @@ namespace HotelRservationAPI.Controllers
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddMinutes(15),
                 signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);

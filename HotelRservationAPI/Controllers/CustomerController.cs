@@ -8,43 +8,42 @@ namespace HotelRservationAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReservationController : Controller
+    public class CustomerController : ControllerBase
     {
-        private readonly IReservationRepository _reservationRepository;
         private readonly ICustomerRepository _customerRepository;
 
-        public ReservationController(IReservationRepository reservationRepository, ICustomerRepository customerRepository)
+        public CustomerController(ICustomerRepository customerRepository)
         {
-            _reservationRepository = reservationRepository;
             _customerRepository = customerRepository;
         }
 
 
         #region HTTPGet
 
+
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Reservation>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Customer>))]
 
         public IActionResult GetBilling()
         {
-            var billing = _reservationRepository.GetReservations();
+            var billing = _customerRepository.GetCustomer();
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             return Ok(billing);
         }
 
-        [HttpGet("{LogInID}")]
-        [ProducesResponseType(200, Type = typeof(Reservation))]
+        [HttpGet("{CustomerID}")]
+        [ProducesResponseType(200, Type = typeof(Customer))]
         [ProducesResponseType(400)]
 
-        public IActionResult GetAccesslog(int LogInID)
+        public IActionResult GetAccesslog(int CustomerID)
         {
-            if (!_reservationRepository.ReservationExist(LogInID))
+            if (!_customerRepository.CustomerExist(CustomerID))
             {
                 return NotFound();
             }
 
-            var AccessLog = _reservationRepository.GetReservation(LogInID);
+            var AccessLog = _customerRepository.GetCustomer(CustomerID);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -54,16 +53,17 @@ namespace HotelRservationAPI.Controllers
         #endregion
 
         #region Post
+
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateReservation([FromQuery] int CustomerID,[FromBody] ReservationDto  reservationCreate)
+        public IActionResult CreateCustomers([FromBody] CustomerDto customerCreate)
         {
-            if (reservationCreate == null)
+            if (customerCreate == null)
                 return BadRequest(ModelState);
 
-            var category = _reservationRepository.GetReservations()
-                .Where(c => c.RoomType.Trim().ToUpper() == reservationCreate.RoomType.TrimEnd().ToUpper())
+            var category = _customerRepository.GetCustomer()
+                .Where(c => c.CustomerName.Trim().ToUpper() == customerCreate.CustomerName.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
             if (category != null)
@@ -75,14 +75,17 @@ namespace HotelRservationAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var categoryMap = new Reservation
+            var categoryMap = new Customer
             {
-                RoomType = reservationCreate.RoomType
+                CustomerID = customerCreate.CustomerID,
+                CustomerName = customerCreate.CustomerName,
+                CustomerAddress = customerCreate.CustomerAddress,
+                CustomerEmail = customerCreate.CustomerEmail,
+                CustomerPhone = customerCreate.CustomerPhone,
+                CustomerReview = customerCreate.CustomerReview,
             };
 
-            categoryMap.Customer = _customerRepository.GetCustomer(CustomerID);
-
-            if (!_reservationRepository.CreateReservation(categoryMap))
+            if (!_customerRepository.CreateCustomer(categoryMap))
             {
                 ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
@@ -93,36 +96,39 @@ namespace HotelRservationAPI.Controllers
         }
         #endregion
 
+
         #region Update
 
-        [HttpPut("{ReservationID}")]
+        [HttpPut("{CustomerID}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
 
-        public IActionResult UpdateCategory(int ReservationID, [FromBody] ReservationDto updatedReservation)
+        public IActionResult UpdateCategory(int CustomerID, [FromBody] CustomerDto updatedCustomer)
         {
-            if (updatedReservation == null)
+            if (updatedCustomer == null)
                 return BadRequest(ModelState);
 
-            if (ReservationID != updatedReservation.ReservationID)
+            if (CustomerID != updatedCustomer.CustomerID)
                 return BadRequest(ModelState);
 
-            if (!_reservationRepository.ReservationExist(ReservationID))
+            if (!_customerRepository.CustomerExist(CustomerID))
                 return NotFound();
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var categoryMap = new Reservation
+            var categoryMap = new Customer
             {
-                ReservationID = updatedReservation.ReservationID,
-                RoomType = updatedReservation.RoomType,
-                CheckinDate = updatedReservation.CheckinDate,
-                CheckoutDate = updatedReservation.CheckoutDate
+                CustomerID = updatedCustomer.CustomerID,
+                CustomerName = updatedCustomer.CustomerName,
+                CustomerAddress = updatedCustomer.CustomerAddress,
+                CustomerEmail = updatedCustomer.CustomerEmail,
+                CustomerPhone = updatedCustomer.CustomerPhone,
+                CustomerReview = updatedCustomer.CustomerReview,
             };
 
-            if (!_reservationRepository.UpdateReservation(categoryMap))
+            if (!_customerRepository.UpdateCustomer(categoryMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating category");
                 return StatusCode(500, ModelState);
@@ -135,23 +141,23 @@ namespace HotelRservationAPI.Controllers
 
         #region Delete
 
-        [HttpDelete("{ReservationID}")]
+        [HttpDelete("{CustomerID}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteCategory(int ReservationID)
+        public IActionResult DeleteCategory(int CustomerID)
         {
-            if (!_reservationRepository.ReservationExist(ReservationID))
+            if (!_customerRepository.CustomerExist(CustomerID))
             {
                 return NotFound();
             }
 
-            var ReservationToDelete = _reservationRepository.GetReservation(ReservationID);
+            var CustomerToDelete = _customerRepository.GetCustomer(CustomerID);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_reservationRepository.DeleteReservation(ReservationToDelete))
+            if (!_customerRepository.DeleteCustomer(CustomerToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong deleting category");
             }

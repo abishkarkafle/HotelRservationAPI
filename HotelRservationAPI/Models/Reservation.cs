@@ -7,5 +7,7 @@
         public DateTime CheckinDate { get; set; }
         public DateTime CheckoutDate { get; set; }
 
+        public Customer Customer { get; set; }
+
     }
 }
