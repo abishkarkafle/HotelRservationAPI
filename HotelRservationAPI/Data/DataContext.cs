@@ -14,6 +14,7 @@ namespace HotelRservationAPI.Data
         public DbSet<Room> rooms { get; set; }
         public DbSet<Register> registers { get; set; }
         public DbSet<Customer> customers { get; set; }
+        public DbSet<Staff> staff { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
