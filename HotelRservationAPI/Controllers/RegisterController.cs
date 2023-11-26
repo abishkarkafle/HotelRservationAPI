@@ -40,20 +40,31 @@ namespace HotelRservationAPI.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(RegisterDto request)
         {
-            if (user.Username != request.Username)
+            try
             {
-                return BadRequest("User not found.");
-            }
+                // Check if the username exists
+                if (user.Username != request.Username)
+                {
+                    return BadRequest("Invalid username or password.");
+                }
 
-            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
-            {
-                return BadRequest("Wrong password.");
-            }
+                // Verify the password
+                if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+                {
+                    return BadRequest("Invalid username or password.");
+                }
 
+                // If username and password are valid, create and return the JWT token
                 string token = CreateToken(user);
-
-            return Ok(token);
+                return Ok(token);
+            }
+            catch (Exception)
+            {
+                // Return a generic error message to the client
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred during login.");
+            }
         }
+
 
         private string CreateToken(Register user)
         {
